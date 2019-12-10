@@ -40,6 +40,7 @@ na.omit(map)
 #price <- unique(map$Price)
 
 
+
 #Layout
 ui <- fluidPage(
     titlePanel("Airbnb in Amsterdam"),
@@ -48,7 +49,7 @@ ui <- fluidPage(
             selectInput("t", "Room Type", map$roomtype),
             selectInput("n", "Neighbourhood", map$neighbourhood),
             #sliderInput("p","Price Range",map$price,max = 8500,min = 0,value = c(0,1500)),
-            actionButton("resetBeatSelection", "Reset Map Selection")
+            actionButton("reset","Reset Map Selection")
         ),
         mainPanel(
             leafletOutput(outputId = "mymap")
@@ -65,8 +66,8 @@ server <- function(input, output) {
     # output the map 
     output$mymap <- renderLeaflet(
         selected() %>% leaflet() %>% addTiles() %>%
-            addMarkers(~long, ~lat)
+         addMarkers(~long, ~lat)
     )
-    
+
 }
 shinyApp(ui, server)
