@@ -12,7 +12,7 @@ library(shiny)
 pacman::p_load("shiny","tidyverse","leaflet","leaflet.extras")
 
 #Read in data
-df <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/listings.csv")
+df <- read.csv("listings.csv")
 
 
 #Data Cleaning
