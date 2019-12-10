@@ -47,9 +47,8 @@ ui <- fluidPage(
         sidebarPanel(
             selectInput("t", "Room Type", map$roomtype),
             selectInput("n", "Neighbourhood", map$neighbourhood),
-            #selectInput("p","Price",price),
-            actionButton("resetBeatSelection", "Reset Map Selection"),
-            sliderInput("p","Price Range",map$price,min=0,max=8500,value=200)
+            #sliderInput("p","Price Range",map$price,max = 8500,min = 0,value = c(0,1500)),
+            actionButton("resetBeatSelection", "Reset Map Selection")
         ),
         mainPanel(
             leafletOutput(outputId = "mymap")
@@ -61,7 +60,7 @@ ui <- fluidPage(
 server <- function(input, output) {
     # pull out the data
     selected <- reactive( 
-        map %>% filter(roomtype==input$t & neighbourhood==input$n & price==input$p)
+        map %>% filter(roomtype==input$t & neighbourhood==input$n  )
     )
     # output the map 
     output$mymap <- renderLeaflet(
