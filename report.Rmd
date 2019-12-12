@@ -96,6 +96,15 @@ kable(t(stat_df))
 
 ```
 
+## 2.2. Graph Presentations
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+
+
+
+
+```
+
 
 # 3. Principal Component Analysis
 
@@ -125,18 +134,7 @@ room760599 <-
   df2 %>%
   filter(listing_id=="760599")
 
-get_sentiments("nrc")
-get_sentiments("bing")
-text_private <- room2818$comments 
-text_private <-
-  text_private %>%
-  inner_join(get_sentiments("bing")) %>%
-  count(text_private,index=linenumber%/%80,sentiment) %>%
-  spread(sentiment,n,fill=0) %>%
-  mutate(sentiment=positive-negative)
 
-ggplot(text_private,aes(index,sentiment, fill=room2818$comments))+
-  geom_col(show.ledgend=FALSE)
 
 
 
