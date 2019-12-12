@@ -1,11 +1,9 @@
 ---
-title: "Final Project of Airbnb in Amsterdam"
+title: "Airbnb in Amsterdam"
 author: "Xiaofan Xia"
-date: "12/9/2019"
-output:
-  pdf_document: default
+date: "12/12/2019"
+output: ioslides_presentation
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -18,35 +16,25 @@ df1 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amst
 df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
 df1 <- df1[-5]
 ```
-# 1. Overview
 
-## 1.1 Introduction
+## Introduction
+Objective: Finding out the relationship between reviewers’ comments and price regarding to different room type and neighborhood in Amsterdam. 
 
-This project focuses on digging into the Airbnb dataset of Amsterdam. My main objective is to find out the relationship between reviewers’ comments and price regarding to different room type and neighborhood. Then, I want to generate a shiny app to show an Airbnb location map of Amsterdam. 
+Deliverables: A report, a presentation, a shiny app.
 
-## 1.2 Motivation
+Dataset: Airbnb Amsterdam from Kaggle. (
 
-I am planning on take a vacation to Europe next spring break these days. Amsterdam is on top of my visiting lists. I believe Airbnb Amsterdam dataset could give me some help both in finding great neighborhood to stay and also positive reviewed places to stay while my visiting. 
+Source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
 
-## 1.3 Dataset: Airbnb Amsterdam from Kaggle
+## Research Questions
+1. Is there any relationship between the price and the attitude of reviewers of an Airbnb? 
+2. Is there any relationship between the price and the neighborhood of the Airbnb located?
+3. Is there any difference in prices regarding different room types of Airbnb?
+4. Is there any relationship between the price and the availability of an Airbnb?
+5. Generate a shiny app to show locations of Amsterdam’s Airbnb places. 
 
-source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
 
-## 1.4 Research Questions
-
-a. Is there any relationship between the price and the attitude of reviewers of an Airbnb? 
-
-b. Is there any relationship between the price and the neighborhood of the Airbnb located?
-
-c. Is there any difference in prices regarding different room types of Airbnb?
-
-d. Is there any relationship between the price and the availability of an Airbnb?
-
-e. Generate a shiny app to show locations of Amsterdam’s Airbnb places. 
-
-# 2. Exploratory Data Analysis
-
-## 2.1 Basic Statistics 
+## Basic Statistics 
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 # availability 365
@@ -96,58 +84,12 @@ kable(t(stat_df))
 
 ```
 
-
-# 3. Principal Component Analysis
-
-```{r echo=FALSE,warning=FALSE,message=FALSE}
-#PCA(df1$price, scale.unit = TRUE, ncp = 5, graph = TRUE)
+## Graph Presentations
 
 
+## Principal Component Analysis
 
-```
 
-# 4. Text Analysis
 
+## Text Analysis
 First, I conduct a text analysis on three Airbnb places from each room type (shared room, entire home/apt, and private room). 
-```{r echo=FALSE,message=FALSE,warning=FALSE}
-# Private room
-room2818 <- 
-  df2 %>%
-  filter(listing_id=="2818")
-
-# Entire home/apt
-room20168 <-
-  df2 %>%
-  filter(listing_id=="20168")
-
-# Shared room
-room760599 <-
-  df2 %>%
-  filter(listing_id=="760599")
-
-get_sentiments("nrc")
-get_sentiments("bing")
-text_private <- room2818$comments 
-text_private <-
-  text_private %>%
-  inner_join(get_sentiments("bing")) %>%
-  count(text_private,index=linenumber%/%80,sentiment) %>%
-  spread(sentiment,n,fill=0) %>%
-  mutate(sentiment=positive-negative)
-
-ggplot(text_private,aes(index,sentiment, fill=room2818$comments))+
-  geom_col(show.ledgend=FALSE)
-
-
-
-```
-
-# 4. Conclusion and Discussion
-
-
-## 4.1. Results
-
-## 4.2. Limitations and Concerns
-
-# 5. Appendix
-
