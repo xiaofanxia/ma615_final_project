@@ -14,9 +14,11 @@ library(tidytext)
 library(kableExtra)
 library(factoextra)
 library(FactoMineR)
-df1 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/listings.csv")
-df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
+df1 <- read.csv("listings.csv")
 df1 <- df1[-5]
+room2818 <- read.csv("room2818.csv")
+room20168 <- read.csv("room20168.csv")
+room760599 <- read.csv("room760599.csv")
 ```
 # 1. Overview
 
@@ -45,6 +47,8 @@ d. Is there any relationship between the price and the availability of an Airbnb
 e. Generate a shiny app to show locations of Amsterdam’s Airbnb places. 
 
 # 2. Exploratory Data Analysis
+
+In this project, I assume that prices of Airbnbs are in the same currency and the same unit. 
 
 ## 2.1 Basic Statistics 
 
@@ -98,12 +102,40 @@ kable(t(stat_df))
 
 ## 2.2. Graph Presentations
 
+Here are the graph presentations of shared rooms. The first plot (Figure 1) illustrates the relationship between the number of reviews of each Airbnb in total and the prices. We can see that Airbnbs with lower prices tend to have more reviews. The second plot (Figure 2) shows that the relationship between the number of reviews per month and the prices of Airbnbs, which is basically consistent with the pattern in Figure 1. The price range of shared rooms is around 0 to 300 units.  
+
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
-
-
-
-
+share <- 
+  df1 %>%
+  filter(room_type=="Shared room")
+ggplot(share)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 1")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
+ggplot(share)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 2")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
 ```
+
+Here are the graph presentations of private rooms. The pattern of the relationship between the number of reviews and the prices are similar to the pattern of share rooms. Figure 3 shows the number of reviews in total and Figure 4 shows the number of reviews per month. However, there are a lot more private rooms than shared rooms in Amsterdam, and the price range of private rooms is wider as well. Except one Airbnb's price is 5000 units per night, others' prices are in the range from 0 to 1000 units, and I also neglect the outlier (the room with price at 5000 units) in the plot. 
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+private <- 
+  df1 %>%
+  filter(room_type=="Private room")
+ggplot(private)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 3")+xlab("Price")+ylab("Number of reviews in total")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+ggplot(private)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 4")+xlab("Price")+ylab("Number of reviews per month")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+```
+
+Here are the graph presentations of the entire home or apartments. The price range of entire apartments are much more wider than other room types, but the pattern of relationship between the number of reviews and the prices are very similar in all room types. 
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+entire <- 
+  df1 %>%
+  filter(room_type=="Entire home/apt")
+ggplot(entire)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 5")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
+ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 6")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
+```
+
+
+
+
+
 
 
 # 3. Principal Component Analysis
@@ -123,20 +155,19 @@ First, I conduct a text analysis on three Airbnb places from each room type (sha
 room2818 <- 
   df2 %>%
   filter(listing_id=="2818")
+write.csv(room2818,file="room2818")
 
 # Entire home/apt
 room20168 <-
   df2 %>%
   filter(listing_id=="20168")
+write.csv(room20168,file="room20168")
 
 # Shared room
 room760599 <-
   df2 %>%
   filter(listing_id=="760599")
-
-
-
-
+write.csv(room760599,file="room760599")
 
 ```
 

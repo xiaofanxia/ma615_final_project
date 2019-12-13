@@ -3,6 +3,7 @@ title: "Airbnb in Amsterdam"
 author: "Xiaofan Xia"
 date: "12/12/2019"
 output: ioslides_presentation
+
 ---
 
 ```{r setup, include=FALSE}
@@ -12,13 +13,23 @@ library(tidytext)
 library(kableExtra)
 library(factoextra)
 library(FactoMineR)
+options("kableExtra.html.bsTable" = T)
 df1 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/listings.csv")
 df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
 df1 <- df1[-5]
+share <- 
+  df1 %>%
+  filter(room_type=="Shared room")
+private <- 
+  df1 %>%
+  filter(room_type=="Private room")
+entire <- 
+  df1 %>%
+  filter(room_type=="Entire home/apt")
 ```
 
 ## Introduction
-Objective: Finding out the relationship between reviewers’ comments and price regarding to different room type and neighborhood in Amsterdam. 
+Objective: Finding out the relationship between reviewers’ comments and price regarding to different room type and neighborhood in Amsterdam. (All prices in this project are assumed in the same currency and the same unit.)
 
 Deliverables: A report, a presentation, a shiny app.
 
@@ -85,6 +96,35 @@ kable(t(stat_df))
 ```
 
 ## Graph Presentations
+## Shared rooms
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(share)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Shared rooms")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
+```
+
+## Shared rooms
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(share)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Shared rooms")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
+```
+
+## Private rooms
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(private)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Private rooms")+xlab("Price")+ylab("Number of reviews in total")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+```
+
+## Private rooms
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(private)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Private rooms")+xlab("Price")+ylab("Number of reviews per month")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+```
+
+## Entire homes/ apartments
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(entire)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Entire home/ apartment")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
+```
+
+## Entire homes/ apartments
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Entire home/ apartment")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
+```
 
 
 ## Principal Component Analysis
