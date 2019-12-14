@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(leaflet)
 
 pacman::p_load("shiny","tidyverse","leaflet","leaflet.extras")
 
@@ -70,4 +71,5 @@ server <- function(input, output) {
     )
 
 }
+
 shinyApp(ui, server)

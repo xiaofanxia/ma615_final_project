@@ -4,6 +4,7 @@ author: "Xiaofan Xia"
 date: "12/9/2019"
 output:
   pdf_document: default
+  always_allow_html: yes
 ---
 
 
@@ -14,27 +15,43 @@ library(tidytext)
 library(kableExtra)
 library(factoextra)
 library(FactoMineR)
+library(wordcloud)
+library(wordcloud2)
+library(RColorBrewer)
+library(webshot)
+library(htmlwidgets)
+
 df1 <- read.csv("listings.csv")
+#df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
 df1 <- df1[-5]
-room2818 <- read.csv("room2818.csv")
-room20168 <- read.csv("room20168.csv")
-room760599 <- read.csv("room760599.csv")
+#Private room
+#room2818 <- df2 %>%filter(listing_id=="2818")
+#write.csv(room2818,file="room2818.csv")
+#Entire home/apt
+#room20168 <-df2 %>%filter(listing_id=="20168")
+#write.csv(room20168,file="room20168.csv")
+#Shared room
+#room760599 <-df2 %>%filter(listing_id=="760599")
+#write.csv(room760599,file="room760599.csv")
+room_p <- read.csv("room2818.csv")
+room_e <- read.csv("room20168.csv")
+room_s <- read.csv("room760599.csv")
 ```
 # 1. Overview
 
-## 1.1 Introduction
+## 1.1. Introduction
 
-This project focuses on digging into the Airbnb dataset of Amsterdam. My main objective is to find out the relationship between reviewers’ comments and price regarding to different room type and neighborhood. Then, I want to generate a shiny app to show an Airbnb location map of Amsterdam. 
+This project focuses on digging into the Airbnb dataset of Amsterdam. My main objective is to find out the relationship between reviewers’ comments and price regarding to different room type and neighborhood. Then, I want to generate a shiny app to show an Airbnb location map of Amsterdam. In this project, I assume that prices of Airbnbs are in the same currency and the same unit. 
 
-## 1.2 Motivation
+## 1.2. Motivation
 
 I am planning on take a vacation to Europe next spring break these days. Amsterdam is on top of my visiting lists. I believe Airbnb Amsterdam dataset could give me some help both in finding great neighborhood to stay and also positive reviewed places to stay while my visiting. 
 
-## 1.3 Dataset: Airbnb Amsterdam from Kaggle
+## 1.3. Dataset: Airbnb Amsterdam from Kaggle
 
 source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
 
-## 1.4 Research Questions
+## 1.4. Research Questions
 
 a. Is there any relationship between the price and the attitude of reviewers of an Airbnb? 
 
@@ -48,9 +65,7 @@ e. Generate a shiny app to show locations of Amsterdam’s Airbnb places.
 
 # 2. Exploratory Data Analysis
 
-In this project, I assume that prices of Airbnbs are in the same currency and the same unit. 
-
-## 2.1 Basic Statistics 
+## 2.1. Basic Statistics 
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 # availability 365
@@ -102,7 +117,7 @@ kable(t(stat_df))
 
 ## 2.2. Graph Presentations
 
-Here are the graph presentations of shared rooms. The first plot (Figure 1) illustrates the relationship between the number of reviews of each Airbnb in total and the prices. We can see that Airbnbs with lower prices tend to have more reviews. The second plot (Figure 2) shows that the relationship between the number of reviews per month and the prices of Airbnbs, which is basically consistent with the pattern in Figure 1. The price range of shared rooms is around 0 to 300 units.  
+Here are graph presentations of share rooms. The first plot (Figure 1) illustrates the relationship between the number of reviews of each Airbnb in total and the prices. I can see that Airbnbs with lower prices tend to have more reviews. The second plot (Figure 2) shows that the relationship between the number of reviews per month and the prices of Airbnbs, which is basically consistent with the pattern in Figure 1. The price range of shared rooms is around 0 to 300 units. From Figure 3, most places with prices lower than 100 units are basically sold out through the year. 
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 share <- 
@@ -110,33 +125,33 @@ share <-
   filter(room_type=="Shared room")
 ggplot(share)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 1")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
 ggplot(share)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 2")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
+ggplot(share)+geom_point(aes(price,availability_365,color=neighbourhood))+ggtitle("Figure 3")+xlab("Price")+ylab("Number of available night per 365 days")+theme(legend.text = element_text(size=5))
 ```
 
-Here are the graph presentations of private rooms. The pattern of the relationship between the number of reviews and the prices are similar to the pattern of share rooms. Figure 3 shows the number of reviews in total and Figure 4 shows the number of reviews per month. However, there are a lot more private rooms than shared rooms in Amsterdam, and the price range of private rooms is wider as well. Except one Airbnb's price is 5000 units per night, others' prices are in the range from 0 to 1000 units, and I also neglect the outlier (the room with price at 5000 units) in the plot. 
+\newpage
+
+Here are the graph presentations of private rooms. The pattern of the relationship between the number of reviews and the prices are similar to the pattern of share rooms. Figure 4 shows the number of reviews in total and Figure 5 shows the number of reviews per month. However, there are a lot more private rooms than shared rooms in Amsterdam, and the price range of private rooms is wider as well. Except one Airbnb's price is 5000 units per night, others' prices are in the range from 0 to 1000 units, and I also neglect the outlier (the room with price at 5000 units) in the plot. From Figure 6, there is no explicit relationship between the availibility and the prices for private rooms.  
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 private <- 
   df1 %>%
   filter(room_type=="Private room")
-ggplot(private)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 3")+xlab("Price")+ylab("Number of reviews in total")+xlim(0,1000)+theme(legend.text = element_text(size=5))
-ggplot(private)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 4")+xlab("Price")+ylab("Number of reviews per month")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+ggplot(private)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 4")+xlab("Price")+ylab("Number of reviews in total")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+ggplot(private)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 5")+xlab("Price")+ylab("Number of reviews per month")+xlim(0,1000)+theme(legend.text = element_text(size=5))
+ggplot(private)+geom_point(aes(price,availability_365,color=neighbourhood))+ggtitle("Figure 6")+xlab("Price")+ylab("Number of available night per 365 days")+theme(legend.text = element_text(size=5))+xlim(0,1000)
 ```
 
-Here are the graph presentations of the entire home or apartments. The price range of entire apartments are much more wider than other room types, but the pattern of relationship between the number of reviews and the prices are very similar in all room types. 
+\newpage
+Here are the graph presentations of the entire home or apartments. The price range of entire apartments are much more wider than other room types, but the pattern of relationship between the number of reviews and the prices are very similar in all room types. From Figure 9, there is no explicit relationship between the availability and the prices.
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 entire <- 
   df1 %>%
   filter(room_type=="Entire home/apt")
-ggplot(entire)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 5")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
-ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 6")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
+ggplot(entire)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Figure 7")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
+ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Figure 8")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
+ggplot(entire)+geom_point(aes(price,availability_365,color=neighbourhood))+ggtitle("Figure 9")+xlab("Price")+ylab("Number of available night per 365 days")+theme(legend.text = element_text(size=5))
 ```
-
-
-
-
-
-
 
 # 3. Principal Component Analysis
 
@@ -149,34 +164,78 @@ ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggti
 
 # 4. Text Analysis
 
-First, I conduct a text analysis on three Airbnb places from each room type (shared room, entire home/apt, and private room). 
+I conduct a text analysis on three Airbnb places from each room type (shared room, entire home/apt, and private room) to obtain that what elements relate the most to each Airbnb and also what people care most about those Airbnb places. 
+
+\newpage
+## 4.1. Shared room
+
+From this word cloud, I can easily tell that the host has a boat in this place, and probably the host name is Simon. Most of the comments reflect a positive attitude towards this Airbnb. 
+
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
-# Private room
-room2818 <- 
-  df2 %>%
-  filter(listing_id=="2818")
-write.csv(room2818,file="room2818")
-
-# Entire home/apt
-room20168 <-
-  df2 %>%
-  filter(listing_id=="20168")
-write.csv(room20168,file="room20168")
-
-# Shared room
-room760599 <-
-  df2 %>%
-  filter(listing_id=="760599")
-write.csv(room760599,file="room760599")
+comment_s <- room_s$comments
+df_s <-tibble(line=1:46,text=comment_s)
+df_s$text <- as.character(df_s$text)
+df_s <-
+  df_s %>%
+  unnest_tokens(output=word,input=text,token="words") %>%
+  anti_join(stop_words)
+df_s <-
+  df_s%>%
+  count(word,sort = TRUE)
+wc1 <-wordcloud2(df_s,size=0.5,color = "random-light",shape = "circle")
+saveWidget(wc1,"wc1.html",selfcontained = F)
+webshot::webshot("wc1.html","wc1.png",vwidth = 600, vheight = 500, delay =5)
+print(wc1)
 
 ```
 
-# 4. Conclusion and Discussion
+\newpage
+## 4.2. Private room
 
+From this word cloud, I believe that Daniel might be the host of this private room and his place is clean and nice, which is also recommended by the reviewers. 
 
-## 4.1. Results
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+comment_p <- room_p$comments
+df_p <-tibble(line=1:248,text=comment_p)
+df_p$text <- as.character(df_p$text)
+df_p <-
+  df_p %>%
+  unnest_tokens(output=word,input=text,token="words") %>%
+  anti_join(stop_words)
+df_p <-
+  df_p%>%
+  count(word,sort = TRUE)
+wc2 <-wordcloud2(df_p,size=1,color = "random-light",shape = "circle")
+saveWidget(wc2,"wc2.html",selfcontained = F)
+webshot::webshot("wc2.html","wc2.png",vwidth = 600, vheight = 500, delay =5)
+print(wc2)
 
-## 4.2. Limitations and Concerns
+```
 
-# 5. Appendix
+\newpage
+## 4.3. Entire homes/ apartments
+
+From the word cloud, I think Alex might be the host of this apartment. His place is clean, nice and comfortable and I believe the apartment's location is most noticable element for people who stay here. 
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+comment_e <- room_e$comments
+df_e <-tibble(line=1:233,text=comment_e)
+df_e$text <- as.character(df_e$text)
+df_e <-
+  df_e %>%
+  unnest_tokens(output=word,input=text,token="words") %>%
+  anti_join(stop_words)
+df_e <-
+  df_e%>%
+  count(word,sort = TRUE)
+wc3 <- wordcloud2(df_e,size=0.8,color = "random-light",shape = "circle")
+saveWidget(wc3,"wc3.html",selfcontained = F)
+webshot::webshot("wc3.html","wc3.png",vwidth = 600, vheight = 500, delay =5)
+print(wc3)
+
+```
+
+# 5. Conclusion and Discussion
+
+After the analysis, I find out that places with lower prices tend to have more reviews and reviewers write about the elements they care about most in their comments of the Airbnb places. Some certain neighbourhoods have more Airbnb places than others, which also leads to more reviews and comments for those neighbourhoods. 
 

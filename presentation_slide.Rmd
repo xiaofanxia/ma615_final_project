@@ -13,9 +13,15 @@ library(tidytext)
 library(kableExtra)
 library(factoextra)
 library(FactoMineR)
+library(wordcloud)
+library(wordcloud2)
+library(RColorBrewer)
+library(webshot)
+library(htmlwidgets)
+
 options("kableExtra.html.bsTable" = T)
 df1 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/listings.csv")
-df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
+#df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
 df1 <- df1[-5]
 share <- 
   df1 %>%
@@ -26,16 +32,29 @@ private <-
 entire <- 
   df1 %>%
   filter(room_type=="Entire home/apt")
+#Private room
+#room2818 <- df2 %>%filter(listing_id=="2818")
+#write.csv(room2818,file="room2818.csv")
+#Entire home/apt
+#room20168 <-df2 %>%filter(listing_id=="20168")
+#write.csv(room20168,file="room20168.csv")
+#Shared room
+#room760599 <-df2 %>%filter(listing_id=="760599")
+#write.csv(room760599,file="room760599.csv")
+room_p <- read.csv("room2818.csv")
+room_e <- read.csv("room20168.csv")
+room_s <- read.csv("room760599.csv")
 ```
 
 ## Introduction
-Objective: Finding out the relationship between reviewers’ comments and price regarding to different room type and neighborhood in Amsterdam. (All prices in this project are assumed in the same currency and the same unit.)
+- Objective: Explore the relationship between reviewers’ comments and the  price. 
+(All prices in this project are assumed in the same currency and the same unit.)
 
-Deliverables: A report, a presentation, a shiny app.
+- Deliverables: A report, a presentation, a shiny app.
 
-Dataset: Airbnb Amsterdam from Kaggle. (
+- Dataset: Airbnb Amsterdam from Kaggle. (
 
-Source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
+- Source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
 
 ## Research Questions
 1. Is there any relationship between the price and the attitude of reviewers of an Airbnb? 
@@ -95,33 +114,33 @@ kable(t(stat_df))
 
 ```
 
-## Graph Presentations
-## Shared rooms
+
+## Graph Presentations of Shared Rooms
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(share)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Shared rooms")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
 ```
 
-## Shared rooms
+## Graph Presentations of Shared Rooms
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(share)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Shared rooms")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
 ```
 
-## Private rooms
+## Graph Presentations of Private Rooms
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(private)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Private rooms")+xlab("Price")+ylab("Number of reviews in total")+xlim(0,1000)+theme(legend.text = element_text(size=5))
 ```
 
-## Private rooms
+## Graph Presentations of Private Rooms
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(private)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Private rooms")+xlab("Price")+ylab("Number of reviews per month")+xlim(0,1000)+theme(legend.text = element_text(size=5))
 ```
 
-## Entire homes/ apartments
+## Graph Presentations of Entire Homes/ Apartments
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(entire)+geom_point(aes(price,number_of_reviews,color=neighbourhood))+ggtitle("Entire home/ apartment")+xlab("Price")+ylab("Number of reviews in total")+theme(legend.text = element_text(size=5))
 ```
 
-## Entire homes/ apartments
+## Graph Presentations of Entire Homes/ Apartments
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggtitle("Entire home/ apartment")+xlab("Price")+ylab("Number of reviews per month")+theme(legend.text = element_text(size=5))
 ```
@@ -132,4 +151,70 @@ ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggti
 
 
 ## Text Analysis
-First, I conduct a text analysis on three Airbnb places from each room type (shared room, entire home/apt, and private room). 
+
+- Three Airbnb places from each room types.
+
+- Text analysis for each place.
+
+- Word cloud of comments for each Airbnb. 
+
+- What elements relate to the Airbnb mostly. 
+
+## Shared room
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+comment_s <- room_s$comments
+df_s <-tibble(line=1:46,text=comment_s)
+df_s$text <- as.character(df_s$text)
+df_s <-
+  df_s %>%
+  unnest_tokens(output=word,input=text,token="words") %>%
+  anti_join(stop_words)
+df_s <-
+  df_s%>%
+  count(word,sort = TRUE)
+wc1 <-wordcloud2(df_s,size=0.5,color = "random-light",shape = "circle")
+saveWidget(wc1,"wc1.html",selfcontained = F)
+webshot::webshot("wc1.html","wc1.png",vwidth = 600, vheight = 400, delay =5)
+print(wc1)
+```
+
+## Private room
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+comment_p <- room_p$comments
+df_p <-tibble(line=1:248,text=comment_p)
+df_p$text <- as.character(df_p$text)
+df_p <-
+  df_p %>%
+  unnest_tokens(output=word,input=text,token="words") %>%
+  anti_join(stop_words)
+df_p <-
+  df_p%>%
+  count(word,sort = TRUE)
+wc2 <-wordcloud2(df_p,size=1,color = "random-light",shape = "circle")
+saveWidget(wc2,"wc2.html",selfcontained = F)
+webshot::webshot("wc2.html","wc2.png",vwidth = 600, vheight =400, delay =5)
+print(wc2)
+
+```
+
+## Entire homes/ apartments
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+comment_e <- room_e$comments
+df_e <-tibble(line=1:233,text=comment_e)
+df_e$text <- as.character(df_e$text)
+df_e <-
+  df_e %>%
+  unnest_tokens(output=word,input=text,token="words") %>%
+  anti_join(stop_words)
+df_e <-
+  df_e%>%
+  count(word,sort = TRUE)
+wc3 <- wordcloud2(df_e,size=0.8,color = "random-light",shape = "circle")
+saveWidget(wc3,"wc3.html",selfcontained = F)
+webshot::webshot("wc3.html","wc3.png",vwidth = 600, vheight = 400, delay =5)
+print(wc3)
+```
+
+
+## Conclusion and Discussion
+
