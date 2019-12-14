@@ -20,7 +20,7 @@ library(wordcloud2)
 library(RColorBrewer)
 library(webshot)
 library(htmlwidgets)
-
+library(textdata)
 df1 <- read.csv("listings.csv")
 #df2 <- read.csv("/Users/XiaofanXia/Desktop/MA615/ma615_final project/airbnb-amsterdam/reviews_details.csv")
 df1 <- df1[-5]
@@ -49,7 +49,7 @@ I am planning on take a vacation to Europe next spring break these days. Amsterd
 
 ## 1.3. Dataset: Airbnb Amsterdam from Kaggle
 
-source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
+Source: https://www.kaggle.com/erikbruin/airbnb-amsterdam.
 
 ## 1.4. Research Questions
 
@@ -211,6 +211,35 @@ webshot::webshot("wc1.html","wc1.png",vwidth = 600, vheight = 500, delay =5)
 print(wc1)
 
 ```
+\newpage
+Here is the sentimental analysis.
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+afinn1 <- df_s %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = n) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc1 <- bind_rows(df_s %>% 
+                            inner_join(get_sentiments("bing")) %>%
+                            mutate(method = "Bing et al."),
+                          df_s %>% 
+                            inner_join(get_sentiments("nrc") %>% 
+                                         filter(sentiment %in% c("positive", 
+                                                                 "negative"))) %>%
+                            mutate(method = "NRC")) %>%
+  count(method, index =n ,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+bind_rows(afinn1, 
+          bing_and_nrc1) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+```
+
 
 \newpage
 ## 4.2. Private room
@@ -233,6 +262,34 @@ saveWidget(wc2,"wc2.html",selfcontained = F)
 webshot::webshot("wc2.html","wc2.png",vwidth = 600, vheight = 500, delay =5)
 print(wc2)
 
+```
+\newpage
+Here is the sentimental analysis.
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+afinn2 <- df_p %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = n) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc2 <- bind_rows(df_p %>% 
+                            inner_join(get_sentiments("bing")) %>%
+                            mutate(method = "Bing et al."),
+                          df_s %>% 
+                            inner_join(get_sentiments("nrc") %>% 
+                                         filter(sentiment %in% c("positive", 
+                                                                 "negative"))) %>%
+                            mutate(method = "NRC")) %>%
+  count(method, index =n ,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+bind_rows(afinn2, 
+          bing_and_nrc2) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
 ```
 
 \newpage
@@ -258,7 +315,37 @@ print(wc3)
 
 ```
 
+\newpage
+
+Here is the sentimental analysis.
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+afinn3 <- df_e %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = n) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc3 <- bind_rows(df_e %>% 
+                            inner_join(get_sentiments("bing")) %>%
+                            mutate(method = "Bing et al."),
+                          df_s %>% 
+                            inner_join(get_sentiments("nrc") %>% 
+                                         filter(sentiment %in% c("positive", 
+                                                                 "negative"))) %>%
+                            mutate(method = "NRC")) %>%
+  count(method, index =n ,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+bind_rows(afinn3, 
+          bing_and_nrc3) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+```
+
 # 5. Conclusion and Discussion
 
-After the analysis, I find out that places with lower prices tend to have more reviews and reviewers write about the elements they care about most in their comments of the Airbnb places. Some certain neighbourhoods have more Airbnb places than others, which also leads to more reviews and comments for those neighbourhoods. 
+After the analysis, I find out that places with lower prices tend to have more reviews and reviewers writing about the elements they care about most in their comments of the Airbnb places. Some certain neighbourhoods have more Airbnb places than others, which also leads to more reviews and comments for those neighbourhoods.
 

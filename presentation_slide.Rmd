@@ -175,11 +175,13 @@ screeplot(df3.pr,type = "lines")
 
 - Text analysis for each place.
 
+- Sentimental analysis.
+
 - Word cloud of comments for each Airbnb. 
 
 - What elements relate to the Airbnb mostly. 
 
-## Shared room
+## Shared room word cloud
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
 comment_s <- room_s$comments
 df_s <-tibble(line=1:46,text=comment_s)
@@ -197,7 +199,34 @@ webshot::webshot("wc1.html","wc1.png",vwidth = 600, vheight = 400, delay =5)
 print(wc1)
 ```
 
-## Private room
+## Shared room sentimental analysis
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+afinn1 <- df_s %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = n) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc1 <- bind_rows(df_s %>% 
+                            inner_join(get_sentiments("bing")) %>%
+                            mutate(method = "Bing et al."),
+                          df_s %>% 
+                            inner_join(get_sentiments("nrc") %>% 
+                                         filter(sentiment %in% c("positive", 
+                                                                 "negative"))) %>%
+                            mutate(method = "NRC")) %>%
+  count(method, index =n ,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+bind_rows(afinn1, 
+          bing_and_nrc1) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+```
+
+## Private room word cloud
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
 comment_p <- room_p$comments
 df_p <-tibble(line=1:248,text=comment_p)
@@ -214,6 +243,33 @@ saveWidget(wc2,"wc2.html",selfcontained = F)
 webshot::webshot("wc2.html","wc2.png",vwidth = 600, vheight =400, delay =5)
 print(wc2)
 
+```
+
+## Private room sentimental analysis
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+afinn2 <- df_p %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = n) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc2 <- bind_rows(df_p %>% 
+                            inner_join(get_sentiments("bing")) %>%
+                            mutate(method = "Bing et al."),
+                          df_s %>% 
+                            inner_join(get_sentiments("nrc") %>% 
+                                         filter(sentiment %in% c("positive", 
+                                                                 "negative"))) %>%
+                            mutate(method = "NRC")) %>%
+  count(method, index =n ,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+bind_rows(afinn2, 
+          bing_and_nrc2) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
 ```
 
 ## Entire homes/ apartments
@@ -234,6 +290,39 @@ webshot::webshot("wc3.html","wc3.png",vwidth = 600, vheight = 400, delay =5)
 print(wc3)
 ```
 
+## Entire homes/ apartments sentimental analysis
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+afinn3 <- df_e %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(index = n) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+bing_and_nrc3 <- bind_rows(df_e %>% 
+                            inner_join(get_sentiments("bing")) %>%
+                            mutate(method = "Bing et al."),
+                          df_s %>% 
+                            inner_join(get_sentiments("nrc") %>% 
+                                         filter(sentiment %in% c("positive", 
+                                                                 "negative"))) %>%
+                            mutate(method = "NRC")) %>%
+  count(method, index =n ,sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+bind_rows(afinn3, 
+          bing_and_nrc3) %>%
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+```
+
 
 ## Conclusion and Discussion
+
+- Low-price Airbnbs have more comments and reviews.
+
+- Certain neighbourhoods have more Airbnbs than others (checking in the shiny app).
+
+- Comments reflect the most relative element of the Airbnb. 
 
