@@ -110,10 +110,10 @@ min_night <- c(night_max,night_min,night_mean,night_median)
 stat_df <- data.frame(aval,review_month,review_total,price,min_night)
 names(stat_df) <- c("Availability in nights during a year","Number of reviews per month","Number of reviews in total","Price","Minimum nights of stay")
 row.names(stat_df) <- c("Maximum","Minimum","Mean","Median")
-kable(t(stat_df))
+kable(t(stat_df))%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 
 ```
-
 
 ## Graph Presentations of Shared Rooms
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
@@ -147,6 +147,25 @@ ggplot(entire)+geom_point(aes(price,reviews_per_month,color=neighbourhood))+ggti
 
 
 ## Principal Component Analysis
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+df3 <- cbind(df1[9:11],df1[13],df1[15])
+df3.pr<-princomp(na.omit(df3),scores=TRUE,cor=TRUE,scale.=TRUE)
+sum.df <- summary(df3.pr,loadings=TRUE)
+pca_importance <- function(x) {
+  vars <- x$sdev^2
+  vars <- vars/sum(vars)
+  rbind(`Standard deviation` = x$sdev, `Proportion of Variance` = vars, 
+      `Cumulative Proportion` = cumsum(vars))
+}
+kable( pca_importance(sum.df))%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center",font_size = 18)
+```
+
+## Scree Plot
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+screeplot(df3.pr,type = "lines")
+```
 
 
 

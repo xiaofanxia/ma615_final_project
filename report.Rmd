@@ -111,8 +111,21 @@ min_night <- c(night_max,night_min,night_mean,night_median)
 stat_df <- data.frame(aval,review_month,review_total,price,min_night)
 names(stat_df) <- c("Availability in nights during a year","Number of reviews per month","Number of reviews in total","Price","Minimum nights of stay")
 row.names(stat_df) <- c("Maximum","Minimum","Mean","Median")
-kable(t(stat_df))
+kable(t(stat_df))%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 
+```
+
+\newpage
+Here is the table of the numbers of Airbnb places in each neighbourhood. 
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+invisible(unique(df1$neighbourhood))
+df1 <-
+  df1 %>%
+  group_by(neighbourhood)
+kable(count(df1))%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 ```
 
 ## 2.2. Graph Presentations
@@ -155,11 +168,21 @@ ggplot(entire)+geom_point(aes(price,availability_365,color=neighbourhood))+ggtit
 
 # 3. Principal Component Analysis
 
+I conduct a principal component analysis (PCA) for the numeric columns in the dataset. From the result of the analysis, I can tell that the cumulative proportion becomes 92.8% after the 4th component, and from the scree plot, the changes are not very stable. Therefore, it is not very necessary to reduce the dimension in this project. 
+
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
-#PCA(df1$price, scale.unit = TRUE, ncp = 5, graph = TRUE)
-
-
-
+df3 <- cbind(df1[9:11],df1[13],df1[15])
+df3.pr<-princomp(na.omit(df3),scores=TRUE,cor=TRUE,scale.=TRUE)
+sum.df <- summary(df3.pr,loadings=TRUE)
+pca_importance <- function(x) {
+  vars <- x$sdev^2
+  vars <- vars/sum(vars)
+  rbind(`Standard deviation` = x$sdev, `Proportion of Variance` = vars, 
+      `Cumulative Proportion` = cumsum(vars))
+}
+kable( pca_importance(sum.df))%>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+screeplot(df3.pr,type = "lines")
 ```
 
 # 4. Text Analysis
